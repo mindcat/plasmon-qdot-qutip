@@ -72,7 +72,9 @@ if __name__ == '__main__':
 
     qdot_dipole_magnitude_au = qdot_dipole_magnitude * debye_to_au
     plasmon_dipole_magnitude_au = plasmon_dipole_magnitude * debye_to_au
-    laser_intensity_au = laser_intensity * volts_over_meters_to_au
+    laser_intensity_au = laser_intensity #* volts_over_meters_to_au
+
+
 
     #####################################################################
     ### JJF Comment: Sus of these as rates, hbar is in atomic units but these 

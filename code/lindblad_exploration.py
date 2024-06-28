@@ -93,6 +93,23 @@ if __name__ == '__main__':
     qdot_dephasing_rate_au = qdot_dephasing_energy_au / hbar
     plasmon_damping_rate_au = plasmon_damping_energy_au / hbar
 
+    print(F'QD energy {qdot_energy_quantum_au}')
+    print(F'QD damping energy {qdot_damping_energy_au}')
+    print(F'QD dephasing energy {qdot_dephasing_energy_au}')
+
+    print(F'Plasmon energy {plasmon_energy_quantum_au}')
+    print(F'Plasmon damping energy {plasmon_damping_energy_au}')
+
+    print(F'Efield energy {efield_energy_quantum_au}')
+    
+    print(F'Sim time in fs t0 and t1 {sim_time[0]} {sim_time[1]}')
+    print(F'Sim time in au t0 and t1 {sim_time_au[0]} {sim_time_au[1]}')
+    print(F'Laser magnitude {laser_intensity_au}')
+
+    print(F'QDot dipole {qdot_dipole_magnitude_au}')
+    print(F'Plasmon dipole {plasmon_dipole_magnitude_au}')
+    print(F'Interaction energies {interaction_energies_au[0]}')
+
     # make a basic quantum dot system
     ### JJF Comment: I am creating this instance with the parameters in atomic units now
     quantum_dot = utils.System(
@@ -141,7 +158,7 @@ if __name__ == '__main__':
 
     def E(t):
         """ Return electric field strength at a point in time `t`. """
-        return laser_intensity * np.cos(efield_frequency * t)
+        return laser_intensity * np.cos(efield_frequency_au * t)
 
     def make_hamiltonian(static_part, dipole_part):
         """ Return a hamiltonian closure. """
@@ -165,13 +182,13 @@ if __name__ == '__main__':
     # line plot
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02, row_heights=[0.75, 0.25])
     for i, expectation_vals in enumerate(result.expect[:len(qdots)]):
-        fig.add_trace(go.Scatter(x=sim_time, y=expectation_vals, name=f'Quantum Dot {i}'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=sim_time, y=result.expect[len(qdots)], name='Plasmon'), row=1, col=1)
+        fig.add_trace(go.Scatter(x=sim_time_au, y=expectation_vals, name=f'Quantum Dot {i}'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=sim_time_au, y=result.expect[len(qdots)], name='Plasmon'), row=1, col=1)
     # fig.add_trace(go.Scatter(x=sim_time, y=E(sim_time)*1000, name='E Field (x1000)'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=sim_time, y=result.expect[-1], name="System Purity"), row=2, col=1)
+    fig.add_trace(go.Scatter(x=sim_time_au, y=result.expect[-1], name="System Purity"), row=2, col=1)
     fig.update_yaxes(title_text=r'$\langle N \rangle$', row=1, col=1)
     fig.update_yaxes(title_text='Purity', row=2, col=1)
-    fig.update_xaxes(title_text='Time (fs)', row=2, col=1)
+    fig.update_xaxes(title_text='Time (au)', row=2, col=1)
     fig.update_layout(margin=dict(l=20, r=20, t=5, b=20))
     fig.show()
 

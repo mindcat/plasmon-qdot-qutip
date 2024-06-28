@@ -42,7 +42,7 @@ if __name__ == '__main__':
     N = 5  # Number of plasmon levels
     # sim_time = np.linspace(0, 2000, 1000)   # fs
     # sim_time = np.linspace(0, 2000, 5000)   # fs
-    sim_time = np.linspace(0, 2000, 100000)   # fs
+    sim_time = np.linspace(0, 200, 500000)   # fs
     # sim_time = np.linspace(0, 2000, 1000000)   # fs
     # plasmon_energy_quantum = qdot_energy_quantum = efield_energy_quantum = 2.042   # eV
     plasmon_energy_quantum = 2.042   # eV
@@ -85,6 +85,27 @@ if __name__ == '__main__':
     plasmon_damping_rate = plasmon_damping_energy / hbar
     #####################################################################
 
+    print(F'QD energy {qdot_energy_quantum_au}')
+    print(F'QD damping energy {qdot_damping_energy_au}')
+    print(F'QD dephasing energy {qdot_dephasing_energy_au}')
+
+    print(F'Plasmon energy {plasmon_energy_quantum_au}')
+    print(F'Plasmon damping energy {plasmon_damping_energy_au}')
+
+    print(F'Efield energy {efield_energy_quantum_au}')
+    
+    print(F'Sim time in fs t0 and t1 {sim_time[0]} {sim_time[1]}')
+    print(F'Sim time in au t0 and t1 {sim_time_au[0]} {sim_time_au[1]}')
+    print(F'Laser magnitude {laser_intensity_au}')
+
+    print(F'QDot dipole {qdot_dipole_magnitude_au}')
+    print(F'Plasmon dipole {plasmon_dipole_magnitude_au}')
+    print(F'Interaction energies {interaction_energies_au[0]}')
+
+
+
+
+
     ########## 
     ### JJF Commment: now with the energies in atomic units, we can identify rates or frequencies in atomic units
     ### and they will have the same magnitudes as their respective energies
@@ -99,8 +120,8 @@ if __name__ == '__main__':
         qt.ket2dm(qt.basis(2, 0)),
         lower=qt.destroy(2),
         number=qt.num(2),
-        emission=np.sqrt(qdot_damping_rate_au) * qt.destroy(2),
-        dephase=np.sqrt(2 * qdot_dephasing_rate_au) * qt.num(2)
+        emission=np.sqrt(qdot_damping_rate) * qt.destroy(2),
+        dephase=np.sqrt(2 * qdot_dephasing_rate) * qt.num(2)
     )
 
     ### JJF Comment: creating plasmon instance using parameters in atomic units
@@ -108,13 +129,13 @@ if __name__ == '__main__':
         qt.ket2dm(qt.basis(N, 0)),
         lower=qt.destroy(N),
         number=qt.num(N),
-        damping=np.sqrt(plasmon_damping_rate_au) * qt.destroy(N)
+        damping=np.sqrt(plasmon_damping_rate) * qt.destroy(N)
     )
 
     # combine however many quantum dot systems and the plasmon system into a multipart system
     # JJF Comment: quantum_dot and plasmon instances are using atomic units, also using interaction_energies_au
     # which is in atomic units
-    system = reduce(mul, [copy.deepcopy(quantum_dot) for _ in interaction_energies_au] + [plasmon])
+    system = reduce(mul, [copy.deepcopy(quantum_dot) for _ in interaction_energies] + [plasmon])
     # extract the subsystem operators from the multipart system
     qdots = system.as_list[:-1]
     plasmon = system.as_list[-1]
@@ -124,18 +145,18 @@ if __name__ == '__main__':
 
     # construct static part of hamiltonian
     ### JJF Comment: updating energies to be in atomic units
-    H_qdot = qdot_energy_quantum_au * sum([qdot.number for qdot in qdots])
-    H_plasmon = plasmon_energy_quantum_au * plasmon.lower.dag() @ plasmon.lower
+    H_qdot = qdot_energy_quantum * sum([qdot.number for qdot in qdots])
+    H_plasmon = plasmon_energy_quantum * plasmon.lower.dag() @ plasmon.lower
     H_interaction = 1
-    for interaction_energy, qdot in zip(interaction_energies_au, qdots):
+    for interaction_energy, qdot in zip(interaction_energies, qdots):
         H_interaction += interaction_energy * qdot.lower @ plasmon.lower.dag()
         H_interaction += interaction_energy * qdot.lower.dag() @ plasmon.lower
     H_static = (H_qdot + H_plasmon + H_interaction) / hbar
 
     # construct dipole operator
     ### JJF Comment: updating dipole operators to be in atomic units
-    dipole_qdot = qdot_dipole_magnitude_au * sum([qdot.lower.dag() + qdot.lower for qdot in qdots])
-    dipole_plasmon = plasmon_dipole_magnitude_au * (plasmon.lower.dag() + plasmon.lower)
+    dipole_qdot = qdot_dipole_magnitude * sum([qdot.lower.dag() + qdot.lower for qdot in qdots])
+    dipole_plasmon = plasmon_dipole_magnitude * (plasmon.lower.dag() + plasmon.lower)
     dipole_operator = (dipole_qdot + dipole_plasmon) / hbar
 
 
@@ -156,7 +177,7 @@ if __name__ == '__main__':
     result = qt.mesolve(
         H,
         system.state,
-        sim_time_au,
+        sim_time,
         c_ops=collapse_operators,
         e_ops=system.number + [lambda t, state: np.real((state @ state).tr())]
     )

@@ -55,13 +55,40 @@ if __name__ == '__main__':
     plasmon_damping_energy = 0.150   # eV
     qdot_dipole_magnitude = 13.9   # D
     plasmon_dipole_magnitude = 2990   # D
-    laser_intensity = 1.38e-7 * 100   # a.u. (intensity 0.001 MW/cm^2)
+    laser_intensity = 1.38e-7  # * 100   # a.u. (intensity 0.001 MW/cm^2)
+
+    ####################################
+    # Convert all values to atomic units
+    ####################################
+    plasmon_energy_quantum_au = plasmon_energy_quantum * eV_to_au
+    qdot_energy_quantum_au = qdot_energy_quantum * eV_to_au
+    efield_energy_quantum_au = efield_energy_quantum * eV_to_au
+
+    interaction_energies_au = np.array(interaction_energies) * eV_to_au
+    qdot_damping_energy_au = qdot_damping_energy * eV_to_au
+    qdot_dephasing_energy_au = qdot_dephasing_energy * eV_to_au
+    plasmon_damping_energy_au = plasmon_damping_energy * eV_to_au
+
+    qdot_dipole_magnitude_au = qdot_dipole_magnitude * debye_to_au
+    plasmon_dipole_magnitude_au = plasmon_dipole_magnitude * debye_to_au
+    laser_intensity_au = laser_intensity * volts_over_meters_to_au
+
     #####################################################################
+    ### JJF Comment: Sus of these as rates, hbar is in atomic units but these 
+    ### energies are in eV.  The frequencies / rates are therefore in mixed unit systems
     efield_frequency = efield_energy_quantum / hbar
     qdot_damping_rate = qdot_damping_energy / hbar
     qdot_dephasing_rate = qdot_dephasing_energy / hbar
     plasmon_damping_rate = plasmon_damping_energy / hbar
     #####################################################################
+
+    ########## 
+    ### JJF Commment: now with the energies in atomic units, we can identify rates or frequencies in atomic units
+    ### and they will have the same magnitudes as their respective energies
+    efield_frequency_au = efield_energy_quantum_au / hbar
+    qdot_damping_rate_au = qdot_damping_energy_au / hbar
+    qdot_dephasing_rate_au = qdot_dephasing_energy_au / hbar
+    plasmon_damping_rate_au = plasmon_damping_energy_au / hbar
 
     # make a basic quantum dot system
     quantum_dot = utils.System(

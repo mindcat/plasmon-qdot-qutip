@@ -20,8 +20,8 @@ import utils
 #       laser_intensity = 1.38e-7 * 1000
 if __name__ == '__main__':
     #####################################################################
-    # hbar = 0.6582119565476324   # eV/fs
-    hbar = 1   # eV/fs
+    hbar = 0.6582119565476324   # eV/fs
+    # hbar = 1   # eV/fs
     N = 5  # Number of plasmon levels
     # sim_time = np.linspace(0, 2000, 1000)   # fs
     # sim_time = np.linspace(0, 2000, 5000)   # fs

@@ -19,9 +19,26 @@ import utils
 #       interaction_energies = [0.0108, 0.0108*2] & efield_energy_quantum = 2.032
 #       laser_intensity = 1.38e-7 * 1000
 if __name__ == '__main__':
+    ###### Conversion factors to atomic units
+    # eV to atomic units 
+    eV_to_au = 1 / 27.211396 
+
+    # Debye to atomic units
+    debye_to_au = 1 / 2.541746473
+
+    # Seconds to atomic units
+    seconds_to_au = 1 / 2.4188843265864e-17
+
+    # fs to atomic units
+    femtoseconds_to_au = 1e-15 / 2.4188843265864e-17
+
+    # Electric field in V/m to atomic units
+    volts_over_meters_to_au = 1 / 5.14220652e11
+
+
     #####################################################################
     # hbar = 0.6582119565476324   # eV/fs
-    hbar = 1   # eV/fs
+    hbar = 1   # JJF Note: this is the value in atomic units eV/fs
     N = 5  # Number of plasmon levels
     # sim_time = np.linspace(0, 2000, 1000)   # fs
     # sim_time = np.linspace(0, 2000, 5000)   # fs

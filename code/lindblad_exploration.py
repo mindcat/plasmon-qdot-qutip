@@ -60,11 +60,12 @@ if __name__ == '__main__':
     ####################################
     # Convert all values to atomic units
     ####################################
+    sim_time_au = sim_time * femtoseconds_to_au
     plasmon_energy_quantum_au = plasmon_energy_quantum * eV_to_au
     qdot_energy_quantum_au = qdot_energy_quantum * eV_to_au
     efield_energy_quantum_au = efield_energy_quantum * eV_to_au
 
-    interaction_energies_au = np.array(interaction_energies) * eV_to_au
+    interaction_energies_au = [0.0108 * eV_to_au, 0.0108 * eV_to_au]
     qdot_damping_energy_au = qdot_damping_energy * eV_to_au
     qdot_dephasing_energy_au = qdot_dephasing_energy * eV_to_au
     plasmon_damping_energy_au = plasmon_damping_energy * eV_to_au
@@ -91,23 +92,27 @@ if __name__ == '__main__':
     plasmon_damping_rate_au = plasmon_damping_energy_au / hbar
 
     # make a basic quantum dot system
+    ### JJF Comment: I am creating this instance with the parameters in atomic units now
     quantum_dot = utils.System(
         qt.ket2dm(qt.basis(2, 0)),
         lower=qt.destroy(2),
         number=qt.num(2),
-        emission=np.sqrt(qdot_damping_rate) * qt.destroy(2),
-        dephase=np.sqrt(2 * qdot_dephasing_rate) * qt.num(2)
+        emission=np.sqrt(qdot_damping_rate_au) * qt.destroy(2),
+        dephase=np.sqrt(2 * qdot_dephasing_rate_au) * qt.num(2)
     )
-    # make a basic plasmon system
+
+    ### JJF Comment: creating plasmon instance using parameters in atomic units
     plasmon = utils.System(
         qt.ket2dm(qt.basis(N, 0)),
         lower=qt.destroy(N),
         number=qt.num(N),
-        damping=np.sqrt(plasmon_damping_rate) * qt.destroy(N)
+        damping=np.sqrt(plasmon_damping_rate_au) * qt.destroy(N)
     )
 
     # combine however many quantum dot systems and the plasmon system into a multipart system
-    system = reduce(mul, [copy.deepcopy(quantum_dot) for _ in interaction_energies] + [plasmon])
+    # JJF Comment: quantum_dot and plasmon instances are using atomic units, also using interaction_energies_au
+    # which is in atomic units
+    system = reduce(mul, [copy.deepcopy(quantum_dot) for _ in interaction_energies_au] + [plasmon])
     # extract the subsystem operators from the multipart system
     qdots = system.as_list[:-1]
     plasmon = system.as_list[-1]
@@ -116,17 +121,19 @@ if __name__ == '__main__':
     collapse_operators = [qdot.emission for qdot in qdots] + [qdot.dephase for qdot in qdots] + [plasmon.damping]
 
     # construct static part of hamiltonian
-    H_qdot = qdot_energy_quantum * sum([qdot.number for qdot in qdots])
-    H_plasmon = plasmon_energy_quantum * plasmon.lower.dag() @ plasmon.lower
+    ### JJF Comment: updating energies to be in atomic units
+    H_qdot = qdot_energy_quantum_au * sum([qdot.number for qdot in qdots])
+    H_plasmon = plasmon_energy_quantum_au * plasmon.lower.dag() @ plasmon.lower
     H_interaction = 1
-    for interaction_energy, qdot in zip(interaction_energies, qdots):
+    for interaction_energy, qdot in zip(interaction_energies_au, qdots):
         H_interaction += interaction_energy * qdot.lower @ plasmon.lower.dag()
         H_interaction += interaction_energy * qdot.lower.dag() @ plasmon.lower
     H_static = (H_qdot + H_plasmon + H_interaction) / hbar
 
     # construct dipole operator
-    dipole_qdot = qdot_dipole_magnitude * sum([qdot.lower.dag() + qdot.lower for qdot in qdots])
-    dipole_plasmon = plasmon_dipole_magnitude * (plasmon.lower.dag() + plasmon.lower)
+    ### JJF Comment: updating dipole operators to be in atomic units
+    dipole_qdot = qdot_dipole_magnitude_au * sum([qdot.lower.dag() + qdot.lower for qdot in qdots])
+    dipole_plasmon = plasmon_dipole_magnitude_au * (plasmon.lower.dag() + plasmon.lower)
     dipole_operator = (dipole_qdot + dipole_plasmon) / hbar
 
 
@@ -147,7 +154,7 @@ if __name__ == '__main__':
     result = qt.mesolve(
         H,
         system.state,
-        sim_time,
+        sim_time_au,
         c_ops=collapse_operators,
         e_ops=system.number + [lambda t, state: np.real((state @ state).tr())]
     )

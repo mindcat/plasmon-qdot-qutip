@@ -128,6 +128,10 @@ if __name__ == '__main__':
         damping=np.sqrt(plasmon_damping_rate_au) * qt.destroy(N)
     )
 
+    ### MEW Comment: Print out the plasmon and quantum dot instances for comparison between a.u. and eV
+    print(f'Plasmon Op Names: {plasmon.operator_names}')
+    print(f'Quantum Dot Op Names: {quantum_dot.operator_names}')
+
     # combine however many quantum dot systems and the plasmon system into a multipart system
     # JJF Comment: quantum_dot and plasmon instances are using atomic units, also using interaction_energies_au
     # which is in atomic units

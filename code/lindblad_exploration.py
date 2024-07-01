@@ -20,7 +20,7 @@ import utils
 #       laser_intensity = 1.38e-7 * 1000
 if __name__ == '__main__':
     # Flag to use parameters in atomic units
-    _use_au = True
+    _use_au = False
 
     N = 5  # Number of plasmon levels
 
@@ -154,7 +154,14 @@ if __name__ == '__main__':
     def make_hamiltonian(static_part, dipole_part):
         """ Return a hamiltonian closure. """
         def hamiltonian(t):
-            return static_part - dipole_part * E(t)
+            # define a conversion factor for d * E into eV  
+            # if we aren't using atomic units
+            if _use_au:
+                fac = 1
+            else: 
+                fac = debye_to_SI * SI_to_eV / volts_over_meters_to_au 
+
+            return static_part - dipole_part * E(t) * fac
         return hamiltonian
 
     # make a hamiltonian function using QuTiP's representation of operators

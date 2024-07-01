@@ -19,26 +19,87 @@ import utils
 #       interaction_energies = [0.0108, 0.0108*2] & efield_energy_quantum = 2.032
 #       laser_intensity = 1.38e-7 * 1000
 if __name__ == '__main__':
-    #####################################################################
-    hbar = 0.6582119565476324   # eV/fs
-    # hbar = 1   # eV/fs
-    N = 5  # Number of plasmon levels
-    # sim_time = np.linspace(0, 2000, 1000)   # fs
-    # sim_time = np.linspace(0, 2000, 5000)   # fs
-    sim_time = np.linspace(0, 2000, 100000)   # fs
-    # sim_time = np.linspace(0, 2000, 1000000)   # fs
-    # plasmon_energy_quantum = qdot_energy_quantum = efield_energy_quantum = 2.042   # eV
-    plasmon_energy_quantum = 2.042   # eV
-    qdot_energy_quantum = 2.042  # eV
-    efield_energy_quantum = 2.042   # eV
+    # Flag to use parameters in atomic units
+    _use_au = True
 
-    interaction_energies = [0.0108, 0.0108]   # eV
-    qdot_damping_energy = 268e-9   # eV
-    qdot_dephasing_energy = 0.00127   # eV
-    plasmon_damping_energy = 0.150   # eV
-    qdot_dipole_magnitude = 13.9   # D
-    plasmon_dipole_magnitude = 2990   # D
-    laser_intensity = 1.38e-7 * 100   # a.u. (intensity 0.001 MW/cm^2)
+    N = 5  # Number of plasmon levels
+
+    # time step data in fs
+    sim_start_time_fs = 0
+    sim_end_time_fs = 2000
+    N_steps = 100000
+
+    ###### Conversion factors 
+    # eV to atomic units 
+    eV_to_au = 1 / 27.211396
+
+    # Debye to atomic units
+    debye_to_au = 1 / 2.541746473
+
+    # Seconds to atomic units
+    seconds_to_au = 1 / 2.4188843265864e-17
+
+    # fs to atomic units
+    femtoseconds_to_au = 1e-15 / 2.4188843265864e-17
+
+    # Electric field in V/m to atomic units
+    volts_over_meters_to_au = 1 / 5.14220652e11
+
+    # Debye to SI units
+    debye_to_SI = 3.33564e-30
+
+    # Joule to eV
+    SI_to_eV = 6.24150e18
+
+    # scale simulation time parameters for au option
+    sim_start_time_au = 0
+    sim_end_time_au = sim_end_time_fs * femtoseconds_to_au
+
+
+    #####################################################################
+    # conditional to see which unit system we will use
+
+    if _use_au:
+        hbar = 1   # au
+        sim_time = np.linspace(sim_start_time_au, sim_end_time_au, N_steps)   # au
+        plasmon_energy_quantum = 2.042 * eV_to_au # au
+        qdot_energy_quantum = 2.042 * eV_to_au # au
+        efield_energy_quantum = 2.042 * eV_to_au # au
+
+        interaction_energies = [0.0108 * eV_to_au, 0.0108 * eV_to_au]   # au
+        qdot_damping_energy = 268e-9  * eV_to_au # au
+        qdot_dephasing_energy = 0.00127  * eV_to_au # au
+        plasmon_damping_energy = 0.150  * eV_to_au # au
+        qdot_dipole_magnitude = 13.9 * debye_to_au # au
+        plasmon_dipole_magnitude = 2990  * debye_to_au # au
+        laser_intensity = 1.4e-6  # au, (intensity 0.1 MW/cm^2), see pg 4, column 2, line 6
+        print(F'Performing Simulation in Atomic Units.  All parameters are in atomic units ')
+        print(F'Propagation timestep is {sim_time[1]} a.u. of time')
+        print(F'Total simulation time will be {sim_end_time_au} a.u. of time')
+        print(F'Which is the same as {sim_end_time_au / femtoseconds_to_au} fs')
+
+    else:
+
+        hbar = 0.6582119565476324   # eV/fs
+        sim_time = np.linspace(sim_start_time_fs, sim_end_time_fs, N_steps)   # fs 
+        plasmon_energy_quantum = 2.042   # eV
+        qdot_energy_quantum = 2.042  # eV
+        efield_energy_quantum = 2.042   # eV
+
+        interaction_energies = [0.0108, 0.0108]   # eV
+        qdot_damping_energy = 268e-9   # eV
+        qdot_dephasing_energy = 0.00127   # eV
+        plasmon_damping_energy = 0.150   # eV
+        qdot_dipole_magnitude = 13.9   # D
+        plasmon_dipole_magnitude = 2990   # D
+        laser_intensity = 1.4e-6  # a.u. (intensity 0.1 MW/cm^2), see pg 4, column 2, line 6
+        print(F'Performing Simulation with energy in eV and time in fs.  All energy parameters are in eV')
+        print(F'The dipole moments are currently in Debye and the electric field is in atomic units')
+        print(F'We will convert the E * mu to eV in make_hamiltonian(static_part, dipole_part)')
+        print(F'Propagation timestep is {sim_time[1]} fs of time')
+        print(F'Total simulation time will be {sim_end_time_fs} fs of time')
+        print(F'Which is the same as {sim_end_time_fs * femtoseconds_to_au} au')
+
     #####################################################################
     efield_frequency = efield_energy_quantum / hbar
     qdot_damping_rate = qdot_damping_energy / hbar
